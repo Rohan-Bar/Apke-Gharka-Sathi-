@@ -114,9 +114,101 @@
                             "Your Trusted Partner for Every Home Need."
                         </span>
                     </h1>
-                    <p class="text-base sm:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
-                        Bringing the ease of ride-hailing to home maintenance. Book background-verified plumbers, electricians, rajmistris, and carpenters with transparent upfront pricing and real-time technician tracking.
-                    </p>
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Live Map Container -->
+<div class="relative w-full h-80 rounded-2xl overflow-hidden border border-slate-700 shadow-inner" id="uberLiveMap"></div>
+
+<script>
+    let map = null;
+    let customerMarker = null;
+    let techMarker = null;
+
+    // Custom Map Pin Icons
+    const customerIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        iconSize: [35, 35],
+        iconAnchor: [17, 35],
+        popupAnchor: [0, -35]
+    });
+
+    const techIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063823.png',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+    });
+
+    // 1. Initialize Map with User's Dynamic Live GPS Location
+    function initDynamicMap() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    renderMap(userLat, userLng);
+                },
+                (error) => {
+                    console.warn("Location permission denied or unavailable, using default view.", error);
+                    // Fallback to default dynamic coordinates if GPS permission is denied
+                    renderMap(20.5937, 78.9629, 5); 
+                }
+            );
+        } else {
+            // Browser doesn't support Geolocation
+            renderMap(20.5937, 78.9629, 5);
+        }
+    }
+
+    // 2. Render Map and Dynamic Markers
+    function renderMap(lat, lng, zoomLevel = 14) {
+        if (!map) {
+            map = L.map('uberLiveMap').setView([lat, lng], zoomLevel);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Dynamic Doorstep Marker at User's Current Location
+            customerMarker = L.marker([lat, lng], { icon: customerIcon }).addTo(map)
+                .bindPopup("<b>Your Doorstep Location</b>").openPopup();
+
+            // Dynamic Technician Marker (Simulated nearby relative to user)
+            const techLat = lat - 0.008;
+            const techLng = lng - 0.008;
+            techMarker = L.marker([techLat, techLng], { icon: techIcon }).addTo(map)
+                .bindPopup("<b>Assigned Verified Technician</b>");
+        }
+    }
+
+    // 3. Update Technician Live Location in Real-Time
+    function updateTechLocation(newLat, newLng) {
+        if (techMarker && map) {
+            techMarker.setLatLng([newLat, newLng]);
+            map.panTo([newLat, newLng]);
+        }
+    }
+
+    // 4. WebSocket Listener for Real-Time Coordinates from Backend
+    function connectTrackingSocket(bookingId) {
+        const ws = new WebSocket(`wss://apke-gharka-sathi-1.onrender.com/ws/tracking/${bookingId}`);
+        
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.lat && data.lng) {
+                updateTechLocation(data.lat, data.lng);
+            }
+        };
+
+        ws.onerror = (err) => {
+            console.error("Tracking WebSocket Error:", err);
+        };
+    }
+
+    // Run on page load
+    window.addEventListener('DOMContentLoaded', initDynamicMap);
+</script>
 
                     <!-- Fast Search & Quick Book Bar -->
                     <div class="bg-white/10 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-white/20 shadow-2xl max-w-xl mx-auto lg:mx-0">
@@ -220,101 +312,7 @@
                                     <span>Instant Match Technician</span>
                                 </button>
                                 <!-- Leaflet CSS & JS CDN -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Live Map Container -->
-<div class="relative w-full h-80 rounded-2xl overflow-hidden border border-slate-700 shadow-inner" id="uberLiveMap"></div>
-
-<script>
-    let map = null;
-    let customerMarker = null;
-    let techMarker = null;
-
-    // Custom Map Pin Icons
-    const customerIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-        iconSize: [35, 35],
-        iconAnchor: [17, 35],
-        popupAnchor: [0, -35]
-    });
-
-    const techIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063823.png',
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -40]
-    });
-
-    // 1. Initialize Map with User's Dynamic Live GPS Location
-    function initDynamicMap() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    renderMap(userLat, userLng);
-                },
-                (error) => {
-                    console.warn("Location permission denied or unavailable, using default view.", error);
-                    // Fallback to default dynamic coordinates if GPS permission is denied
-                    renderMap(20.5937, 78.9629, 5); 
-                }
-            );
-        } else {
-            // Browser doesn't support Geolocation
-            renderMap(20.5937, 78.9629, 5);
-        }
-    }
-
-    // 2. Render Map and Dynamic Markers
-    function renderMap(lat, lng, zoomLevel = 14) {
-        if (!map) {
-            map = L.map('uberLiveMap').setView([lat, lng], zoomLevel);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-
-            // Dynamic Doorstep Marker at User's Current Location
-            customerMarker = L.marker([lat, lng], { icon: customerIcon }).addTo(map)
-                .bindPopup("<b>Your Doorstep Location</b>").openPopup();
-
-            // Dynamic Technician Marker (Simulated nearby relative to user)
-            const techLat = lat - 0.008;
-            const techLng = lng - 0.008;
-            techMarker = L.marker([techLat, techLng], { icon: techIcon }).addTo(map)
-                .bindPopup("<b>Assigned Verified Technician</b>");
-        }
-    }
-
-    // 3. Update Technician Live Location in Real-Time
-    function updateTechLocation(newLat, newLng) {
-        if (techMarker && map) {
-            techMarker.setLatLng([newLat, newLng]);
-            map.panTo([newLat, newLng]);
-        }
-    }
-
-    // 4. WebSocket Listener for Real-Time Coordinates from Backend
-    function connectTrackingSocket(bookingId) {
-        const ws = new WebSocket(`wss://apke-gharka-sathi-1.onrender.com/ws/tracking/${bookingId}`);
-        
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.lat && data.lng) {
-                updateTechLocation(data.lat, data.lng);
-            }
-        };
-
-        ws.onerror = (err) => {
-            console.error("Tracking WebSocket Error:", err);
-        };
-    }
-
-    // Run on page load
-    window.addEventListener('DOMContentLoaded', initDynamicMap);
-</script>
                                 <p class="text-[11px] text-center text-slate-500 flex items-center justify-center gap-1.5">
                                     <i class="fa-solid fa-shield-check text-emerald-500"></i>
                                     OTP Verified at Doorstep • Pay after completion
