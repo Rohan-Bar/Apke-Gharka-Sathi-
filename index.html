@@ -247,7 +247,58 @@
                                     <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
                                     <span>Instant Match Technician</span>
                                 </button>
-                                
+                                <!-- Leaflet CSS & JS CDN (ম্যাপের জন্য) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- লাইভ ম্যাপ কন্টেইনার -->
+<div class="relative w-full h-80 rounded-2xl overflow-hidden border border-slate-700 shadow-inner" id="uberLiveMap"></div>
+
+<script>
+    // ১. ম্যাপ ইনিশিয়ালাইজ করা (ডিফল্ট: কলকাতা/লোকাল লোকেশন)
+    let map = L.map('uberLiveMap').setView([22.5726, 88.3639], 13);
+
+    // ওপেনস্ট্রিটম্যাপ টাইলস লোড
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // ২. কাস্টমার ও টেকনিশিয়ান মার্কার তৈরি
+    let customerIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        iconSize: [35, 35]
+    });
+
+    let techIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063823.png',
+        iconSize: [40, 40]
+    });
+
+    // ডোরস্টেপ পিন
+    let customerMarker = L.marker([22.5726, 88.3639], { icon: customerIcon }).addTo(map)
+        .bindPopup("<b>আপনার বাড়ি (Doorstep)</b>").openPopup();
+
+    // টেকনিশিয়ান মুভিং পিন
+    let techMarker = L.marker([22.5600, 88.3500], { icon: techIcon }).addTo(map)
+        .bindPopup("<b>টেকনিশিয়ান: রাজেশ কুমার</b>");
+
+    // ৩. রিয়েল-টাইম মুভমেন্ট ফাংশন (Uber স্টাইলে লাইভ লোকেশন আপডেট)
+    function updateTechLocation(newLat, newLng) {
+        techMarker.setLatLng([newLat, newLng]);
+        map.panTo([newLat, newLng]);
+    }
+
+    // ব্যাকএন্ড WebSocket থেকে লাইভ কোঅর্ডিনেট পেলে ম্যাপ আপডেট হবে
+    function connectTrackingSocket(bookingId) {
+        const ws = new WebSocket(`wss://apke-gharka-sathi-1.onrender.com/ws/tracking/${bookingId}`);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.lat && data.lng) {
+                updateTechLocation(data.lat, data.lng);
+            }
+        };
+    }
+</script>
                                 <p class="text-[11px] text-center text-slate-500 flex items-center justify-center gap-1.5">
                                     <i class="fa-solid fa-shield-check text-emerald-500"></i>
                                     OTP Verified at Doorstep • Pay after completion
