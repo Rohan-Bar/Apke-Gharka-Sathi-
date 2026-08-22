@@ -45,24 +45,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
 
-    <!-- Top Announcement Bar with Live Backend Connection Status -->
-    <div class="bg-brand-900 text-slate-200 text-xs sm:text-sm py-2 px-4 border-b border-brand-800">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div class="flex items-center gap-2">
-                <span class="bg-brand-accent text-white px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider">Fast & Verified</span>
-                <span>Transparent Upfront Pricing • Live Technician Tracking • 100% Quality Guaranteed</span>
-            </div>
-            <div class="flex items-center gap-4 text-xs">
-                <span><i class="fa-solid fa-phone mr-1 text-brand-accent"></i> 24/7 Helpline: 1800-GHARKA-SATHI</span>
-                <span class="hidden md:inline text-slate-500">|</span>
-                <span class="flex items-center gap-1.5">
-                    <span id="backendStatusIndicator" class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span id="backendStatusLabel" class="text-slate-300">Connecting Backend...</span>
-                </span>
-            </div>
-        </div>
-    </div>
-
+   
     <!-- Navigation Bar -->
     <header class="sticky top-0 z-50 glass-nav border-b border-slate-200/80 shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,18 +71,7 @@
                     <a href="#faq" class="hover:text-brand-600 transition-colors">FAQ</a>
                 </nav>
 
-                <!-- Action Buttons -->
-                <div class="hidden sm:flex items-center gap-3">
-                    <button onclick="openBookingModal('General')" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transition-all active:scale-95">
-                        <i class="fa-solid fa-calendar-check"></i>
-                        <span>Book Service</span>
-                    </button>
-                    <button onclick="switchTab('partner')" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all border border-slate-200">
-                        <i class="fa-solid fa-screwdriver-wrench text-brand-600"></i>
-                        <span>Partner Portal</span>
-                    </button>
-                </div>
-
+                
                 <!-- Mobile Menu Button -->
                 <div class="lg:hidden flex items-center">
                     <button id="mobileMenuBtn" class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none">
